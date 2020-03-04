@@ -1,0 +1,598 @@
+import React, { Component, createRef } from 'react';
+import PropTypes from 'prop-types';
+import debounce from 'lodash.debounce';
+
+import { animateProperty } from './util';
+
+const INERTIAL_SCROLL_TIMEOUT = 100; // Anything below this value might cause issues in iOS devices
+const TOUCH_SCROLLING_VELOCITY_THRESHOLD = 0.001;
+
+const RESIZE_TIMEOUT = 200;
+
+const classnames = (...args) => (
+    args
+        .map((arg) => (
+            typeof arg === 'string' ?
+                arg :
+                arg && Object
+                    .entries(arg)
+                    .filter(([k, v]) => k !== 'undefined' && v)
+                    .map(([k, _]) => k)
+                    .join(' ')
+        ))
+        .filter((arg) => arg)
+        .join(' ')
+);
+
+const noop = () => {};
+
+class Carousel extends Component {
+    state = {
+        current: 0,
+        slideCount: React.Children.count(this.props.children),
+        dragging: false,
+        animating: false,
+    };
+
+    containerRef = createRef();
+    sliderRef = createRef();
+
+    animating = false;
+    autoplayInterval = null;
+    dragging = false;
+    lastTouch = {};
+    touchScrolling = false;
+    touching = false;
+    velocity = {};
+
+    inertialScrollHandler = debounce(() => {
+        this.swapSlides()
+            .then(() => {
+                this.touchScrolling = false;
+
+                if (!this.touching) { this.snapCurrentToPosition(); }
+            });
+    }, INERTIAL_SCROLL_TIMEOUT);
+
+    debouncedResize = debounce(() => {
+        this.setCurrent(this.state.current);
+    }, RESIZE_TIMEOUT);
+
+    componentDidMount() {
+        window.addEventListener('keydown', this.handleKeyboardControlDown);
+        window.addEventListener('keyup', this.handleKeyboardControlUp);
+        window.addEventListener('resize', this.handleResize);
+
+        this.containerRef.current.addEventListener('scroll', this.handleScroll);
+        document.body.addEventListener('touchmove', this.handleTouchScroll, { passive: false });
+
+        this.setupAutoplay();
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.autoplayIntervalMs !== this.props.autoplayIntervalMs) {
+            this.setupAutoplay();
+        }
+
+        const { count } = React.Children;
+        const slideCount = count(this.props.children);
+
+        if (count(prevProps.children) !== slideCount) {
+            this.setState({ slideCount });
+        }
+    }
+
+    componentWillUnmount() {
+        window.clearInterval(this.autoplayInterval);
+
+        this.containerRef.current.removeEventListener('scroll', this.handleScroll);
+
+        window.removeEventListener('keydown', this.handleKeyboardControlDown);
+        window.removeEventListener('keyup', this.handleKeyboardControlUp);
+        window.removeEventListener('resize', this.handleResize);
+
+        document.body.removeEventListener('touchmove', this.handleTouchScroll);
+    }
+
+    render() {
+        const {
+            children,
+            draggable,
+            wrapperClassName,
+            carouselClassName,
+            sliderClassName,
+            keyboardControl,
+            disableNativeScroll,
+            modifierCurrentClassName,
+            modifierDraggableClassName,
+            modifierDraggingClassName,
+            modifierDisableScrollClassName,
+        } = this.props;
+        const { current, dragging } = this.state;
+        const offset = this.offset();
+
+        return (
+            <div className={ classnames('rc-wrapper', wrapperClassName) }>
+                <div
+                    ref={ this.containerRef }
+                    className={ classnames('rc', {
+                        '-no-scroll': disableNativeScroll,
+                        [modifierDisableScrollClassName]: disableNativeScroll,
+                    }, carouselClassName) }
+                    tabIndex={ keyboardControl ? '0' : '-1' }>
+                    <div
+                        ref={ this.sliderRef }
+                        className={ classnames('rc-slider', {
+                            '-draggable': draggable,
+                            '-dragging': dragging,
+                            [modifierDraggableClassName]: draggable,
+                            [modifierDraggingClassName]: dragging,
+                        }, sliderClassName) }
+                        style={ { paddingLeft: offset, paddingRight: offset } }
+                        onDragStart={ this.handleSliderOnDragStart }
+                        onMouseDown={ this.handleSliderMouseDown }
+                        onMouseMove={ this.handleSliderMouseMove }
+                        onMouseLeave={ this.handleSliderMouseLeave }
+                        onMouseUp={ this.handleSliderMouseUp }
+                        onTouchStart={ this.handleSliderTouchStart }
+                        onTouchMove={ this.handleSliderTouchMove }
+                        onTouchEnd={ this.handleSliderTouchEnd } >
+                        {React.Children.map(children, (child, i) => (
+                            React.cloneElement(child, {
+                                ...child.props,
+                                key: i,
+                                className: classnames('rc-slide', {
+                                    '-current': current === i,
+                                    [modifierCurrentClassName]: current === i,
+                                }, child.props.className),
+                                onMouseUp: (ev) => this.handleSlideMouseUp(ev, i),
+                                onDragStart: (ev) => ev.preventDefault(),
+                                onDrag: (ev) => ev.preventDefault(),
+                            })
+                        ))}
+                    </div>
+                </div>
+
+                {this.renderArrows()}
+                {this.renderDots()}
+            </div>
+        );
+    }
+
+    // ------------------------------------------------------------------------ Render props
+
+    renderArrows = () => {
+        if (!this.props.arrows) { return null; }
+
+        const { renderArrows, infinite, arrowClassName, modifierLeftClassName, modifierRightClassName } = this.props;
+        const { current, animating, dragging, slideCount } = this.state;
+
+        if (typeof renderArrows === 'function') {
+            return renderArrows({
+                next: this.handleNext,
+                previous: this.handlePrev,
+                current,
+                animating,
+                dragging,
+            });
+        }
+
+        return (
+            <>
+                <button
+                    className={ classnames('rc-arrow', '-left', arrowClassName, modifierLeftClassName) }
+                    disabled={ animating || dragging || (infinite && current === 0) }
+                    onClick={ this.handlePrev }>
+                    Prev
+                </button>
+                <button
+                    className={ classnames('rc-arrow', '-right', arrowClassName, modifierRightClassName) }
+                    disabled={ animating || dragging || (infinite && current === slideCount - 1) }
+                    onClick={ this.handleNext }>
+                    Next
+                </button>
+            </>
+        );
+    };
+
+    renderDots = () => {
+        if (!this.props.dots) { return null; }
+
+        const { renderDots, dotContainerClassName, dotClassName, modifierCurrentClassName } = this.props;
+        const { current, animating, dragging, slideCount } = this.state;
+
+        if (typeof renderDots === 'function') {
+            return renderDots({
+                setCurrent: this.setCurrent,
+                current,
+                animating,
+                dragging,
+                slideCount,
+            });
+        }
+
+        const setCurrent = (i) => () => this.setCurrent(i);
+
+        return (
+            <div className={ classnames('rc-dots', dotContainerClassName) }>
+                { Array.from({ length: slideCount }).map((_, i) => (
+                    <button
+                        className={ classnames('rc-dot', {
+                            '-current': current === i,
+                            [modifierCurrentClassName]: current === i,
+                        }, dotClassName) }
+                        key={ i }
+                        onClick={ setCurrent(i) }>
+                        {i}
+                    </button>
+                )) }
+            </div>
+        );
+    };
+
+    offset = () => {
+        const { offset } = this.props;
+        const { animating, dragging, current } = this.state;
+
+        return typeof offset === 'function' ?
+            offset({ animating, dragging, current }) :
+            offset;
+    };
+
+    // ------------------------------------------------------------------------ state manipulation
+
+    setStateAsync = (updater) => new Promise((resolve) => this.setState(updater, resolve));
+
+    setupAutoplay = () => {
+        const { autoplayIntervalMs } = this.props;
+
+        window.clearInterval(this.autoplayInterval);
+
+        if (autoplayIntervalMs > 0) {
+            this.autoplayInterval = window.setInterval(() => {
+                const { autoplayDirection } = this.props;
+
+                switch (autoplayDirection) {
+                case 'ltr':
+                    this.handleNext();
+                    break;
+                case 'rtl':
+                    this.handlePrev();
+                    break;
+                default:
+                    break;
+                }
+            }, autoplayIntervalMs);
+        }
+    };
+
+    setLastTouch = (ev) => {
+        if (ev.touches[0]) {
+            const { clientX: lastClientX, clientY: lastClientY, timestamp: lastTimestamp } = this.lastTouch;
+            const { clientX, clientY } = ev.touches[0];
+            const timestamp = performance.now();
+
+            this.velocity = {
+                velocityX: (clientX - lastClientX ?? clientX) / (timestamp - lastTimestamp ?? timestamp),
+                velocityY: (clientY - lastClientY ?? clientY) / (timestamp - lastTimestamp ?? timestamp),
+            };
+
+            this.lastTouch = { timestamp, clientX, clientY };
+        }
+    };
+
+    calculateCurrent = () => {
+        const { children } = this.sliderRef.current;
+
+        let lowestDistance = Infinity;
+        let closestChildIndex = null;
+
+        const { scrollLeft } = this.containerRef.current;
+
+        for (let i = 0; i < children.length; i += 1) {
+            const child = children[i];
+
+            const distance = Math.abs(scrollLeft - child.offsetLeft);
+
+            if (distance < lowestDistance) {
+                lowestDistance = distance;
+                closestChildIndex = i;
+            } else {
+                break;
+            }
+        }
+
+        return closestChildIndex;
+    };
+
+    setCurrent = (i, options = { snap: false }) => {
+        const { snap } = options;
+        const { current } = this.state;
+        const {
+            slideSnapDuration,
+            slideSnapEasing,
+            slideTransitionDuration,
+            slideTransitionEasing,
+        } = this.props;
+
+        const containerScrollLeft = this.containerRef.current.scrollLeft;
+        const targetOffsetLeft = this.sliderRef.current.children[i].offsetLeft;
+
+        this.animating = true;
+        this.setState({ animating: true });
+
+        if (!snap) {
+            this.props.beforeChange({ current, next: i });
+        }
+
+        return animateProperty({
+            element: this.containerRef.current,
+            property: 'scrollLeft',
+            duration: snap ? slideSnapDuration : slideTransitionDuration,
+            amount: targetOffsetLeft - containerScrollLeft - this.offset(),
+            easing: snap ? slideSnapEasing : slideTransitionEasing,
+        })
+            .then(() => {
+                this.animating = false;
+
+                return this.setStateAsync({ current: i, animating: false });
+            })
+            .then(() => {
+                if (!snap) {
+                    this.props.afterChange({ previous: current, current: i });
+                }
+            });
+    };
+
+    snapCurrentToPosition = () => this.setCurrent(this.state.current, { snap: true });
+
+    swapSlides = () => {
+        const previous = this.state.current;
+        const current = this.calculateCurrent();
+        const shouldNotify = previous !== current;
+
+        shouldNotify && this.props.beforeChange({ current: previous, next: current });
+
+        return this.setStateAsync({ current })
+            .then(() => shouldNotify && this.props.afterChange({ previous, current }));
+    };
+
+    shouldAllowCrossAxisScrolling = (ev) => {
+        const path = ev.path || (ev.composedPath && ev.composedPath());
+
+        if (!path.includes(this.containerRef.current)) { return true; }
+
+        const {
+            touching,
+            velocity,
+            props: { disableNativeScroll, touchCrossAxisScrollThreshold, touchSwipeVelocityThreshold },
+        } = this;
+
+        const velocityX = Math.abs(velocity.velocityX ?? 0);
+        const velocityY = Math.abs(velocity.velocityY ?? 0);
+
+        return (
+            !disableNativeScroll ||
+            (touching && velocityY > touchCrossAxisScrollThreshold && velocityX < touchSwipeVelocityThreshold)
+        );
+    };
+
+    // ------------------------------------------------------------------------ Arrow events handlers
+
+    handleNext = () => {
+        const { current, slideCount } = this.state;
+
+        if (current === slideCount - 1 && !this.props.infinite) { return; }
+
+        return this.setCurrent((this.state.current + 1) % this.state.slideCount);
+    };
+
+    handlePrev = () => {
+        const { current } = this.state;
+
+        if (current === 0 && !this.props.infinite) { return; }
+
+        return this.setCurrent(this.state.current === 0 ? this.state.slideCount - 1 : this.state.current - 1);
+    };
+
+    // ------------------------------------------------------------------------ Keyboard events handlers
+
+    handleKeyboardControlDown = (ev) => {
+        if (!this.props.keyboardControl || ev.target !== this.containerRef.current) { return; }
+
+        // Prevent default scroll behaviour with left / right arrow keys
+        if ([37, 39].includes(ev.keyCode)) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+    };
+
+    handleKeyboardControlUp = (ev) => {
+        if (!this.props.keyboardControl || ev.target !== this.containerRef.current) { return; }
+
+        switch (ev.keyCode) {
+        case 37:
+            this.handlePrev();
+            break;
+        case 39:
+            this.handleNext();
+            break;
+        default:
+            break;
+        }
+    };
+
+    // ------------------------------------------------------------------------ Mouse events handlers
+
+    handleSliderOnDragStart = () => {
+        if (!this.props.draggable) { return; }
+
+        this.setState({ dragging: true });
+        this.dragging = true;
+    };
+
+    handleSliderMouseMove = (ev) => {
+        if (!this.props.draggable) { return; }
+
+        // Allow dragging the slider when not grabbing a child element
+        if (!this.dragging && ev.buttons === 1) {
+            this.setState({ dragging: true });
+            this.dragging = true;
+        }
+
+        if (this.dragging) {
+            this.containerRef.current.scrollLeft -= ev.movementX;
+            this.swapSlides();
+        }
+    };
+
+    handleSliderMouseUp = () => {
+        if (!this.props.draggable) { return; }
+
+        this.dragging = false;
+        this.setStateAsync({ dragging: false })
+            .then(() => this.snapCurrentToPosition());
+    };
+
+    handleSliderMouseLeave = () => {
+        if (this.dragging) {
+            this.dragging = false;
+            this.setStateAsync({ dragging: false })
+                .then(() => this.snapCurrentToPosition());
+        }
+    };
+
+    handleSlideMouseUp = (ev, slideIndex) => {
+        if (this.dragging || this.state.current === slideIndex) { return; }
+
+        ev.stopPropagation();
+        this.setCurrent(slideIndex);
+    };
+
+    // ------------------------------------------------------------------------ Touch events handlers
+
+    handleSliderTouchStart = (ev) => {
+        // Note: iOS has a bug where `touchstart` will not be triggered
+        // if user interrupts momentum scrolling with a touch
+
+        this.setLastTouch(ev);
+        this.touching = true;
+    };
+
+    handleSliderTouchMove = (ev) => {
+        this.setLastTouch(ev);
+
+        this.touchScrolling = Math.abs(this.velocity?.velocityX ?? 0) > TOUCH_SCROLLING_VELOCITY_THRESHOLD;
+    };
+
+    handleSliderTouchEnd = (ev) => {
+        this.setLastTouch(ev);
+        this.touching = false;
+
+        const { disableNativeScroll, touchSwipeVelocityThreshold } = this.props;
+        const { velocityX } = this.velocity;
+
+        if (disableNativeScroll && Math.abs(velocityX) > touchSwipeVelocityThreshold) {
+            if (velocityX > 0) {
+                this.handlePrev();
+            } else {
+                this.handleNext();
+            }
+        }
+
+        if (!this.touchScrolling && !disableNativeScroll) {
+            this.snapCurrentToPosition();
+        }
+    };
+
+    // ------------------------------------------------------------------------ Scroll events handlers
+
+    handleScroll = () => {
+        if (this.animating) { return; }
+        if (this.disableNativeScroll && this.velocity.velocityX) { return; }
+
+        this.swapSlides();
+
+        if (this.touchScrolling) {
+            this.inertialScrollHandler.cancel();
+            this.inertialScrollHandler();
+        }
+    };
+
+    handleTouchScroll = (ev) => {
+        if (this.shouldAllowCrossAxisScrolling(ev)) { return; }
+
+        ev.preventDefault();
+    };
+
+    // ------------------------------------------------------------------------ Resize events handlers
+    handleResize = () => {
+        this.debouncedResize.cancel();
+        this.debouncedResize();
+    };
+}
+
+Carousel.propTypes = {
+    children: PropTypes.any.isRequired,
+
+    arrows: PropTypes.bool,
+    dots: PropTypes.bool,
+    disableNativeScroll: PropTypes.bool,
+    draggable: PropTypes.bool,
+    infinite: PropTypes.bool,
+    keyboardControl: PropTypes.bool,
+    resetCurrentOnResize: PropTypes.bool,
+
+    autoplayIntervalMs: PropTypes.number,
+    autoplayDirection: PropTypes.oneOf(['ltr', 'rtl']),
+    offset: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
+    slideSnapEasing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
+    slideSnapDuration: PropTypes.number,
+    slideTransitionEasing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
+    slideTransitionDuration: PropTypes.number,
+    touchSwipeVelocityThreshold: PropTypes.number,
+    touchCrossAxisScrollThreshold: PropTypes.number,
+
+    beforeChange: PropTypes.func,
+    afterChange: PropTypes.func,
+    renderArrows: PropTypes.func,
+    renderDots: PropTypes.func,
+
+    wrapperClassName: PropTypes.string,
+    carouselClassName: PropTypes.string,
+    sliderClassName: PropTypes.string,
+    arrowClassName: PropTypes.string,
+    dotContainerClassName: PropTypes.string,
+    dotClassName: PropTypes.string,
+    modifierDraggableClassName: PropTypes.string,
+    modifierDraggingClassName: PropTypes.string,
+    modifierCurrentClassName: PropTypes.string,
+    modifierDisableScrollClassName: PropTypes.string,
+    modifierLeftClassName: PropTypes.string,
+    modifierRightClassName: PropTypes.string,
+};
+
+Carousel.defaultProps = {
+    arrows: false,
+    dots: false,
+    disableNativeScroll: false,
+    draggable: false,
+    infinite: false,
+    keyboardControl: false,
+    resetCurrentOnResize: true,
+
+    autoplayIntervalMs: 0,
+    autoplayDirection: 'ltr',
+    offset: 0,
+    slideSnapEasing: 'ease-in-out',
+    slideSnapDuration: 150,
+    slideTransitionEasing: 'ease-in-out',
+    slideTransitionDuration: 300,
+    touchSwipeVelocityThreshold: 0.3,
+    touchCrossAxisScrollThreshold: 0.45,
+
+    beforeChange: noop,
+    afterChange: noop,
+};
+
+export default Carousel;
