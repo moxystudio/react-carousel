@@ -1,0 +1,96 @@
+.home {
+    padding: 2rem;
+    background-color: #fff;
+}
+
+.title {
+    margin-bottom: 2rem;
+}
+
+.subtitle {
+    margin: 4rem 0 2rem;
+}
+
+.propSetter {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: stretch;
+    background: #ccc;
+}
+
+@media (max-width: 640px) {
+    .propSetter {
+        flex-direction: column;
+    }
+
+    .propSetterLabel {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 15px;
+    }
+
+    .propSetterInput {
+        order: 2;
+    }
+
+    .propSetterCheckbox {
+        flex: 0 0 auto;
+        order: 1;
+    }
+}
+
+.propSetterColumn {
+    margin: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.propSetterLabel {
+    height: 2rem;
+    margin-bottom: 1rem;
+    line-height: 2rem;
+}
+
+.propSetterInput {
+    margin-right: 1rem;
+    width: 13rem;
+}
+
+.propSetterCheckbox {
+    display: initial;
+}
+
+.customArrow {
+    position: absolute;
+    top: 135px;
+    width: 30px;
+    height: 30px;
+    display: block;
+    background: #c00;
+    border-radius: 15px;
+    color: #fff;
+    text-align: center;
+    line-height: 30px;
+    cursor: pointer;
+}
+
+.customArrowLeft { left: 30px; }
+.customArrowRight { right: 30px; }
+
+.customDot {
+    width: 20px;
+    height: 20px;
+    margin: 0 5px;
+    transform: scale(1);
+    display: inline-block;
+    opacity: 0.7;
+    background: #c00;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 300ms ease-in-out, opacity 300ms linear;
+}
+
+.customDotCurrent {
+    transform: scale(1.2);
+    opacity: 1;
+}

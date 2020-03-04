@@ -1,0 +1,26 @@
+{
+  "name": "demo",
+  "version": "0.0.0",
+  "description": "react-carousel demo website",
+  "main": "index.js",
+  "author": "João Gradim <joao.pereira@moxy.studio>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moxystudio/react-carousel.git"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export"
+  },
+  "dependencies": {
+    "@moxy/react-carousel": "file:..",
+    "classnames": "^2.2.6",
+    "lodash": "^4.17.15",
+    "next": "^9.2.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  }
+}
