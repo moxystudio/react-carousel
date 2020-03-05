@@ -1,0 +1,31 @@
+name: Setup gh-pages
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Install & build
+        run: |
+          npm ci
+          npm run build
+      - name: Install & build demo
+        run: |
+          cd demo
+          npm ci
+          npm run build
+          npm run export
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.4.0
+        with:
+            deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+            publish-branch: gh-pages
+            publish_dir: demo/out

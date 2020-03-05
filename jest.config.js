@@ -5,8 +5,7 @@ module.exports = compose([
     baseConfig,
     withRTL,
     (config) => {
-        config.collectCoverage = true;
-
+        config.collectCoverage = false;
         //   const { coveragePathIgnorePatterns = [] } = config;
 
         //   config.coveragePathIgnorePatterns = [
