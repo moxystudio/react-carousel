@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[5],{Wvus:function(e){e.exports=JSON.parse('{"home.title":"Homepage","error.internal.title":"An error has occurred","error.not_found.title":"Page not found","error.return_to_home":"Return to home","contacts.name":"Name: { name }","contacts.email":"Email: { email }"}')}}]);
