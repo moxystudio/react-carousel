@@ -106,7 +106,7 @@ will render:
 <div className="rc-wrapper">
     <div className="rc">
         <div className="rc-slider">
-            <div className="rc-slide -current">Slide 1div>
+            <div className="rc-slide -current">Slide </div>
             <img className="rc-slide" src={ slide2 } alt="Slide 2" />
             <div class="rc-slide custom">Slide 3<div>
         </div>
@@ -137,7 +137,7 @@ import `@moxy/react-carousel/dist/styles.css`
 
 You can use this stylesheet as is and build on top of it, or use it as
 inspiration for your own styles. The default styles sets `.rc-slide` to
-`display: inline-block`, and, `.rc.slider` to `white-space: nowrap` so that
+`display: inline-block`, and, `.rc-slider` to `white-space: nowrap` so that
 slides are positioned horizontally. You could achieve the same effects with
 `float`, `flexbox`, etc. Because the position for the current slide is
 calculated based on the distance from the element to its parent, it also allows
