@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/moxystudio/react-carousel/compare/v0.1.0...v0.1.1) (2020-03-10)
+
+
+### Bug Fixes
+
+* include `dist` in package.json `files` ([#4](https://github.com/moxystudio/react-carousel/issues/4)) ([4506471](https://github.com/moxystudio/react-carousel/commit/450647131a714aa58ac6ac5b89a9c4df19b7006e))
+* **docs:** readme typos fixed ([b31242b](https://github.com/moxystudio/react-carousel/commit/b31242bfb2f97727ed8a122194b9895ca6e99541))
+
 ## 0.1.0 (2020-03-10)
 
 
