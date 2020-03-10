@@ -6,7 +6,8 @@
   "module": "es/index.js",
   "files": [
     "lib",
-    "es"
+    "es",
+    "dist"
   ],
   "scripts": {
     "lint": "eslint . --ignore-path .gitignore",
