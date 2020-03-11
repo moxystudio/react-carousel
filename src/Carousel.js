@@ -92,6 +92,9 @@ class Carousel extends Component {
         window.removeEventListener('resize', this.handleResize);
 
         document.body.removeEventListener('touchmove', this.handleTouchScroll);
+
+        this.inertialScrollHandler.cancel();
+        this.debouncedResize.cancel();
     }
 
     render() {
