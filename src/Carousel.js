@@ -41,6 +41,8 @@ class Carousel extends Component {
     autoplayInterval = null;
     dragging = false;
     lastTouch = {};
+    lastMousePos = {};
+    throwing = false;
     touchScrolling = false;
     touching = false;
     velocity = {};
@@ -271,17 +273,30 @@ class Carousel extends Component {
 
     setLastTouch = (ev) => {
         if (ev.touches[0]) {
-            const { clientX: lastClientX, clientY: lastClientY, timestamp: lastTimestamp } = this.lastTouch;
             const { clientX, clientY } = ev.touches[0];
             const timestamp = performance.now();
 
-            this.velocity = {
-                velocityX: (clientX - lastClientX ?? clientX) / (timestamp - lastTimestamp ?? timestamp),
-                velocityY: (clientY - lastClientY ?? clientY) / (timestamp - lastTimestamp ?? timestamp),
-            };
-
-            this.lastTouch = { timestamp, clientX, clientY };
+            this.velocity = this.calculateVelocity({ clientX, clientY, timestamp }, this.lastTouch);
+            this.lastTouch = { clientX, clientY, timestamp };
         }
+    };
+
+    setLastMousePos = (ev) => {
+        const { clientX, clientY } = ev;
+        const timestamp = performance.now();
+
+        this.velocity = this.calculateVelocity({ clientX, clientY, timestamp }, this.lastMousePos);
+        this.lastMousePos = { clientX, clientY, timestamp };
+    };
+
+    calculateVelocity = (currentPos, lastPos) => {
+        const { clientX, clientY, timestamp } = currentPos;
+        const { clientX: lastClientX, clientY: lastClientY, timestamp: lastTimestamp } = lastPos;
+
+        return {
+            velocityX: (clientX - lastClientX ?? clientX) / (timestamp - lastTimestamp ?? timestamp),
+            velocityY: (clientY - lastClientY ?? clientY) / (timestamp - lastTimestamp ?? timestamp),
+        };
     };
 
     calculateCurrent = () => {
@@ -380,6 +395,32 @@ class Carousel extends Component {
         );
     };
 
+    // TODO
+    throwSlider = () => {
+        if (!this.props.emulateInertialScrolling) { return Promise.resolve(); }
+
+        const { inertialScrollingDeceleration, inertialScrollingDuration } = this.props;
+        const { velocityX = 0 } = this.velocity;
+
+        const displacement = (velocityX * inertialScrollingDuration) + (0.5 * inertialScrollingDeceleration * (inertialScrollingDuration ** 2));
+
+        this.animating = true;
+        this.setState({ animating: true });
+
+        return animateProperty({
+            element: this.containerRef.current,
+            property: 'scrollLeft',
+            duration: inertialScrollingDuration,
+            amount: -displacement,
+            easing: 'ease-out',
+        });
+        // .then(() => this.swapSlides());
+        // .then(() => {
+        //     this.animating = false;
+        //     this.setState({ animating: false })
+        // })
+    };
+
     // ------------------------------------------------------------------------ Arrow events handlers
 
     handleNext = () => {
@@ -427,9 +468,10 @@ class Carousel extends Component {
 
     // ------------------------------------------------------------------------ Mouse events handlers
 
-    handleSliderOnDragStart = () => {
+    handleSliderOnDragStart = (ev) => {
         if (!this.props.draggable) { return; }
 
+        this.setLastMousePos(ev);
         this.setState({ dragging: true });
         this.dragging = true;
     };
@@ -444,6 +486,7 @@ class Carousel extends Component {
         }
 
         if (this.dragging) {
+            this.setLastMousePos(ev);
             this.containerRef.current.scrollLeft -= ev.movementX;
             this.swapSlides();
         }
@@ -454,13 +497,16 @@ class Carousel extends Component {
 
         this.dragging = false;
         this.setStateAsync({ dragging: false })
+            .then(() => this.throwSlider())
             .then(() => this.snapCurrentToPosition());
     };
 
-    handleSliderMouseLeave = () => {
+    handleSliderMouseLeave = (ev) => {
         if (this.dragging) {
+            this.setLastMousePos(ev);
             this.dragging = false;
             this.setStateAsync({ dragging: false })
+                .then(() => this.throwSlider())
                 .then(() => this.snapCurrentToPosition());
         }
     };
@@ -542,12 +588,15 @@ Carousel.propTypes = {
     dots: PropTypes.bool,
     disableNativeScroll: PropTypes.bool,
     draggable: PropTypes.bool,
+    emulateInertialScrolling: PropTypes.bool,
     infinite: PropTypes.bool,
     keyboardControl: PropTypes.bool,
     resetCurrentOnResize: PropTypes.bool,
 
     autoplayIntervalMs: PropTypes.number,
     autoplayDirection: PropTypes.oneOf(['ltr', 'rtl']),
+    inertialScrollingDeceleration: PropTypes.number,
+    inertialScrollingDuration: PropTypes.number,
     offset: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
     slideSnapEasing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
     slideSnapDuration: PropTypes.number,
@@ -580,12 +629,15 @@ Carousel.defaultProps = {
     dots: false,
     disableNativeScroll: false,
     draggable: false,
+    emulateInertialScrolling: false,
     infinite: false,
     keyboardControl: false,
     resetCurrentOnResize: true,
 
     autoplayIntervalMs: 0,
     autoplayDirection: 'ltr',
+    inertialScrollingDeceleration: 0.005,
+    inertialScrollingDuration: 150,
     offset: 0,
     slideSnapEasing: 'ease-in-out',
     slideSnapDuration: 150,

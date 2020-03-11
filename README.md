@@ -153,14 +153,17 @@ Props
 | `dots`                          | `boolean`              | no           | `false`       |
 | `disableNativeScroll`           | `boolean`              | no           | `false`       |
 | `draggable`                     | `boolean`              | no           | `false`       |
+| `emulateInertialScrolling`      | `boolean`              | no           | `false`       |
 | `infinite`                      | `boolean`              | no           | `false`       |
 | `keyboardControl`               | `boolean`              | no           | `false`       |
 | `resetCurrentOnResize`          | `boolean`              | no           | `true`        |
 | `autoplayIntervalMs`            | `number`               | no           | `0`           |
 | `autoplayDirection`             | `string`               | no           | `'ltr'`       |
+| `inertialScrollingDeceleration` | `number`               | no           | `0.0005`      |
+| `inertialScrollingDuration`     | `number`               | no           | `150`         |
 | `offset`                        | `number` or `function` | no           | `0`           |
 | `slideSnapEasing`               | `string`               | no           | `ease-in-out` |
-| `slideSnapDuration`             | `number`               | no           | `150`         |
+| `slideSnapDuration`             | `number`               | no           | `300`         |
 | `slideTransitionEasing`         | `string`               | no           | `ease-in-out` |
 | `slideTransitionDuration`       | `number`               | no           | `300`         |
 | `touchSwipeVelocityThreshold`   | `number`               | no           | `0.3`         |
@@ -232,8 +235,19 @@ Default: `false`
 If `true`, enables grabbing and dragging the slider with the mouse to change
 its scroll value.
 
-NOTE: When `false`, it only prevents dragging with mouse, it does not prevent
+**Note**: When `false`, it only prevents dragging with mouse, it does not prevent
 dragging with touch events in devices that support it
+
+#### `emulateInertialScrolling`
+
+Type: `boolean`
+
+Default: `false`
+
+**Note**: Only applicable for mouse interactions, and only when `draggable = true`
+
+If `true` dragging and releasing the carousel will emulate inertial / momentum
+scrolling present in mobile devices.
 
 #### `infinite`
 
@@ -282,6 +296,29 @@ The direction that the carousel should change the slides when
 
 - `'ltr'`: causes carousel to change slides from left to right
 - `'rtl'`: causes carousel to change slides from right to left
+
+#### `inertialScrollingDeceleration`
+
+Type: `number`
+
+Default: `0.0005`
+
+**Note**: Only applicable for mouse interactions, and only when `draggable =
+true` and `emulateInertialScrolling = true`.
+
+The rate of deceleration after "throwing" the carousel by dragging it with the
+mouse, in pixels / frame.
+
+#### `inertialScrollingDuration`
+
+Type: `number`
+
+Default: `300`
+
+**Note**: Only applicable for mouse interactions, and only when `draggable =
+true` and `emulateInertialScrolling = true`.
+
+
 
 #### `offset`
 
@@ -525,6 +562,7 @@ Appended to `.rc-arrow.-right` that switches to the next (right) slide
 Future work
 ---
 
+- [ ] Accessibility w/ `aria-*`
 - [ ] Infinite mode
     - [x] enable / disable
     - [x] bounce

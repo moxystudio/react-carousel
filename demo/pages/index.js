@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useCallback } from 'react';
 import Carousel from '@moxy/react-carousel';
 import { isArray } from 'lodash';
 import classnames from 'classnames';
@@ -21,6 +21,7 @@ const carouselProps = [
         ['dots', 'checkbox'],
         ['disableNativeScroll', 'checkbox'],
         ['draggable', 'checkbox'],
+        ['emulateInertialScrolling', 'checkbox'],
         ['infinite', 'checkbox'],
         ['keyboardControl', 'checkbox'],
         ['resetCurrentOnResize', 'checkbox'],
@@ -29,6 +30,8 @@ const carouselProps = [
         ['autoplayIntervalMs', 'number'],
         ['autoplayDirection', ['ltr', 'rtl']],
         ['offset', 'number'],
+        ['inertialScrollingDeceleration', 'number'],
+        ['inertialScrollingDuration', 'number'],
         ['slideSnapDuration', 'number'],
         ['slideSnapEasing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']],
         ['slideTransitionDuration', 'number'],
@@ -54,12 +57,18 @@ const carouselProps = [
 const renderInput = (prop, type, state, setState) => {
     const attr = type === 'checkbox' ? 'checked' : 'value';
 
+    function onChange(ev) {
+        setState({
+            [prop]: type === 'number' ? parseFloat(ev.target[attr]) : ev.target[attr],
+        });
+    }
+
     return (
         <label key={ prop } className={ styles.propSetterLabel }>
             {isArray(type) && (
                 <select
                     className={ styles.propSetterInput }
-                    onChange={ (ev) => setState({ [prop]: ev.target[attr] }) }
+                    onChange={ onChange }
                     value={ state[prop] }>
                     {type.map((option) => (
                         <option key={ option } value={ option }>{ option }</option>
@@ -73,11 +82,7 @@ const renderInput = (prop, type, state, setState) => {
                     { ...{
                         type,
                         [attr]: state[prop],
-                        onChange: (ev) => setState({
-                            [prop]: (
-                                type === 'number' ? parseFloat(ev.target[attr]) : ev.target[attr]
-                            ),
-                        }),
+                        onChange,
                     } } />
             )}
 
@@ -95,16 +100,22 @@ const renderArrows = ({ previous, next }) => (
 );
 
 // eslint-disable-next-line react/prop-types
-const renderDots = ({ setCurrent, current, slideCount }) => (
-    <ul className="rc-dots">
-        {Array.from({ length: slideCount }).map((_, i) => (
-            <li
-                className={ classnames(styles.customDot, { [styles.customDotCurrent]: current === i }) }
-                key={ i }
-                onClick={ () => setCurrent(i) } />
-        ))}
-    </ul>
-);
+const renderDots = ({ setCurrent, current, slideCount }) => {
+    function onClick(i) {
+        return () => setCurrent(i);
+    }
+
+    return (
+        <ul className="rc-dots">
+            {Array.from({ length: slideCount }).map((_, i) => (
+                <li
+                    className={ classnames(styles.customDot, { [styles.customDotCurrent]: current === i }) }
+                    key={ i }
+                    onClick={ onClick(i) } />
+            ))}
+        </ul>
+    );
+};
 
 // eslint-disable-next-line react/prop-types
 const PropSetter = ({ children }) => {
@@ -118,7 +129,8 @@ const PropSetter = ({ children }) => {
             arrows: false,
             dots: false,
             disableNativeScroll: false,
-            draggable: false,
+            draggable: true,
+            emulateInertialScrolling: true,
             infinite: false,
             keyboardControl: false,
             resetCurrentOnResize: true,
@@ -130,6 +142,8 @@ const PropSetter = ({ children }) => {
             slideTransitionEasing: 'ease-in-out',
             touchSwipeVelocityThreshold: 0.3,
             touchCrossAxisScrollThreshold: 0.45,
+            inertialScrollingDeceleration: 0.05,
+            inertialScrollingDuration: 300,
             offset: 100,
             renderArrows: undefined,
             renderDots: undefined,
@@ -158,6 +172,10 @@ const PropSetter = ({ children }) => {
         renderDots: customRenderDots ? renderDots : undefined,
     };
 
+    const onCustomArrowsChange = useCallback((ev) => setCustomRenderArrows(ev.target.checked), []);
+    const onCustomDotsChange = useCallback((ev) => setCustomRenderDots(ev.target.checked), []);
+    const onCustomLogsChange = useCallback((ev) => setLogCallbacks(ev.target.checked), []);
+
     return (
         <>
             <div className={ styles.propSetter }>
@@ -174,7 +192,7 @@ const PropSetter = ({ children }) => {
                         <input
                             type="checkbox"
                             checked={ customRenderArrows }
-                            onChange={ (ev) => setCustomRenderArrows(ev.target.checked) } />
+                            onChange={ onCustomArrowsChange } />
                         Use custom renderArrows
                     </label>
 
@@ -182,7 +200,7 @@ const PropSetter = ({ children }) => {
                         <input
                             type="checkbox"
                             checked={ customRenderDots }
-                            onChange={ (ev) => setCustomRenderDots(ev.target.checked) } />
+                            onChange={ onCustomDotsChange } />
                         Use custom renderDots
                     </label>
                 </div>
@@ -192,7 +210,7 @@ const PropSetter = ({ children }) => {
                         <input
                             type="checkbox"
                             checked={ logCallbacks }
-                            onChange={ (ev) => setLogCallbacks(ev.target.checked) } />
+                            onChange={ onCustomLogsChange } />
                         Log beforeChange and afterChange to console
                     </label>
                 </div>
