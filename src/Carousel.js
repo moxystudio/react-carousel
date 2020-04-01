@@ -274,10 +274,11 @@ class Carousel extends Component {
             const { clientX: lastClientX, clientY: lastClientY, timestamp: lastTimestamp } = this.lastTouch;
             const { clientX, clientY } = ev.touches[0];
             const timestamp = performance.now();
+            const deltaTimestamp = timestamp - lastTimestamp ?? timestamp;
 
             this.velocity = {
-                velocityX: (clientX - lastClientX ?? clientX) / (timestamp - lastTimestamp ?? timestamp),
-                velocityY: (clientY - lastClientY ?? clientY) / (timestamp - lastTimestamp ?? timestamp),
+                x: (clientX - lastClientX ?? clientX) / deltaTimestamp,
+                y: (clientY - lastClientY ?? clientY) / deltaTimestamp,
             };
 
             this.lastTouch = { timestamp, clientX, clientY };
@@ -361,18 +362,20 @@ class Carousel extends Component {
     };
 
     shouldAllowCrossAxisScrolling = (ev) => {
-        const path = ev.path || (ev.composedPath && ev.composedPath());
+        const velocityX = Math.abs(this.velocity.x ?? 0);
+        const velocityY = Math.abs(this.velocity.y ?? 0);
 
-        if (!path.includes(this.containerRef.current)) { return true; }
+        const path = ev.path || (ev.composedPath && ev.composedPath());
+        const isVerticalTouchScroll = velocityY >= velocityX;
+
+        if (!path.includes(this.containerRef.current) || isVerticalTouchScroll) {
+            return true;
+        }
 
         const {
             touching,
-            velocity,
             props: { disableNativeScroll, touchCrossAxisScrollThreshold, touchSwipeVelocityThreshold },
         } = this;
-
-        const velocityX = Math.abs(velocity.velocityX ?? 0);
-        const velocityY = Math.abs(velocity.velocityY ?? 0);
 
         return (
             !disableNativeScroll ||
@@ -485,7 +488,7 @@ class Carousel extends Component {
     handleSliderTouchMove = (ev) => {
         this.setLastTouch(ev);
 
-        this.touchScrolling = Math.abs(this.velocity?.velocityX ?? 0) > TOUCH_SCROLLING_VELOCITY_THRESHOLD;
+        this.touchScrolling = Math.abs(this.velocity?.x ?? 0) > TOUCH_SCROLLING_VELOCITY_THRESHOLD;
     };
 
     handleSliderTouchEnd = (ev) => {
@@ -493,10 +496,9 @@ class Carousel extends Component {
         this.touching = false;
 
         const { disableNativeScroll, touchSwipeVelocityThreshold } = this.props;
-        const { velocityX } = this.velocity;
 
-        if (disableNativeScroll && Math.abs(velocityX) > touchSwipeVelocityThreshold) {
-            if (velocityX > 0) {
+        if (disableNativeScroll && Math.abs(this.velocity.x) > touchSwipeVelocityThreshold) {
+            if (this.velocity.x > 0) {
                 this.handlePrev();
             } else {
                 this.handleNext();
@@ -512,7 +514,7 @@ class Carousel extends Component {
 
     handleScroll = () => {
         if (this.animating) { return; }
-        if (this.disableNativeScroll && this.velocity.velocityX) { return; }
+        if (this.disableNativeScroll && this.velocity.x) { return; }
 
         this.swapSlides();
 
