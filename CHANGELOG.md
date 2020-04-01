@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/moxystudio/react-carousel/compare/v0.1.2...v0.1.3) (2020-04-01)
+
+
+### Bug Fixes
+
+* allow scroll when touch movement is vertical ([bfb3293](https://github.com/moxystudio/react-carousel/commit/bfb3293bdc295e9991a20005ddc04e5552a8e6bd))
+
 ### [0.1.2](https://github.com/moxystudio/react-carousel/compare/v0.1.1...v0.1.2) (2020-03-25)
 
 
