@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/moxystudio/react-carousel/compare/v0.1.3...v0.1.4) (2020-04-03)
+
+
+### Features
+
+* add cross-env to support setting env variables in multiple platforms ([13a8e11](https://github.com/moxystudio/react-carousel/commit/13a8e11f39cae7a12ccd557d159dee55175ae382))
+* swap slides based on drag movement ([6001ae5](https://github.com/moxystudio/react-carousel/commit/6001ae54929267c59a533559b3d7d5a1f0732ddc))
+
 ### [0.1.3](https://github.com/moxystudio/react-carousel/compare/v0.1.2...v0.1.3) (2020-04-01)
 
 
