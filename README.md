@@ -156,6 +156,7 @@ Props
 | `infinite`                      | `boolean`              | no           | `false`       |
 | `keyboardControl`               | `boolean`              | no           | `false`       |
 | `resetCurrentOnResize`          | `boolean`              | no           | `true`        |
+| `swapOnDragMoveEnd`             | `boolean`              | no           | `true`        |
 | `autoplayIntervalMs`            | `number`               | no           | `0`           |
 | `autoplayDirection`             | `string`               | no           | `'ltr'`       |
 | `offset`                        | `number` or `function` | no           | `0`           |
@@ -261,6 +262,19 @@ Default: `true`
 
 If `true`, carousel will re-render with the current state after the window has
 been resized. This operation is debounced by 200ms.
+
+#### `swapOnDragMoveEnd`
+
+Type: `boolean`
+
+Default: `true`
+
+If `true`, the carousel will change the current slide, to an adjacent one,
+based on the direction of the drag movement.
+Although, if the drag is enough to change the current slide by itself, it will
+respect that behaviour. 
+
+*Notes: Only works if the `draggable` prop is set as `true`.*
 
 #### `autoplayIntervalMs`
 
