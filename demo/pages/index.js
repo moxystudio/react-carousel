@@ -24,6 +24,7 @@ const carouselProps = [
         ['infinite', 'checkbox'],
         ['keyboardControl', 'checkbox'],
         ['resetCurrentOnResize', 'checkbox'],
+        ['swapOnDragMoveEnd', 'checkbox'],
     ],
     [
         ['autoplayIntervalMs', 'number'],
@@ -122,6 +123,7 @@ const PropSetter = ({ children }) => {
             infinite: false,
             keyboardControl: false,
             resetCurrentOnResize: true,
+            swapOnDragMoveEnd: true,
             autoplayIntervalMs: 0,
             autoplayDirection: 'ltr',
             slideSnapDuration: 150,

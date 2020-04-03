@@ -39,11 +39,23 @@ class Carousel extends Component {
 
     animating = false;
     autoplayInterval = null;
-    dragging = false;
     lastTouch = {};
     touchScrolling = false;
     touching = false;
     velocity = {};
+
+    drag = {
+        isActive: false,
+        initialIndex: 0,
+        initialMousePos: {
+            clientX: undefined,
+            clientY: undefined,
+        },
+        finalMousePos: {
+            clientX: undefined,
+            clientY: undefined,
+        },
+    };
 
     inertialScrollHandler = debounce(() => {
         this.swapSlides()
@@ -287,15 +299,14 @@ class Carousel extends Component {
 
     calculateCurrent = () => {
         const { children } = this.sliderRef.current;
+        const { scrollLeft } = this.containerRef.current;
+        const { draggable, swapOnDragMoveEnd } = this.props;
 
         let lowestDistance = Infinity;
         let closestChildIndex = null;
 
-        const { scrollLeft } = this.containerRef.current;
-
         for (let i = 0; i < children.length; i += 1) {
             const child = children[i];
-
             const distance = Math.abs(scrollLeft - child.offsetLeft);
 
             if (distance < lowestDistance) {
@@ -303,6 +314,16 @@ class Carousel extends Component {
                 closestChildIndex = i;
             } else {
                 break;
+            }
+        }
+
+        if (draggable && swapOnDragMoveEnd && !this.drag.isActive && closestChildIndex === this.drag.initialIndex) {
+            const { initialIndex, initialMousePos, finalMousePos } = this.drag;
+
+            if (finalMousePos.clientX > initialMousePos.clientX) {
+                return Math.max(initialIndex - 1, 0);
+            } else if (finalMousePos.clientX < initialMousePos.clientX) {
+                return Math.min(initialIndex + 1, this.state.slideCount - 1);
             }
         }
 
@@ -383,6 +404,36 @@ class Carousel extends Component {
         );
     };
 
+    setDragActive = (ev) => {
+        this.setState({ dragging: true });
+
+        this.drag = {
+            isActive: true,
+            initialIndex: this.state.current,
+            initialMousePos: {
+                clientX: ev.clientX,
+                clientY: ev.clientY,
+            },
+            finalMousePos: {
+                clientX: undefined,
+                clientY: undefined,
+            },
+        };
+    };
+
+    setDragInactive = (ev) => {
+        this.drag = {
+            ...this.drag,
+            isActive: false,
+            finalMousePos: {
+                clientX: ev.clientX,
+                clientY: ev.clientY,
+            },
+        };
+
+        return this.setStateAsync({ dragging: false });
+    };
+
     // ------------------------------------------------------------------------ Arrow events handlers
 
     handleNext = () => {
@@ -430,46 +481,54 @@ class Carousel extends Component {
 
     // ------------------------------------------------------------------------ Mouse events handlers
 
-    handleSliderOnDragStart = () => {
+    handleSliderOnDragStart = (ev) => {
         if (!this.props.draggable) { return; }
 
-        this.setState({ dragging: true });
-        this.dragging = true;
+        this.setDragActive(ev);
     };
 
     handleSliderMouseMove = (ev) => {
         if (!this.props.draggable) { return; }
 
         // Allow dragging the slider when not grabbing a child element
-        if (!this.dragging && ev.buttons === 1) {
-            this.setState({ dragging: true });
-            this.dragging = true;
+        if (!this.drag.isActive && ev.buttons === 1) {
+            this.setDragActive(ev);
         }
 
-        if (this.dragging) {
+        if (this.drag.isActive) {
             this.containerRef.current.scrollLeft -= ev.movementX;
             this.swapSlides();
         }
     };
 
-    handleSliderMouseUp = () => {
-        if (!this.props.draggable) { return; }
+    handleSliderMouseUp = (ev) => {
+        if (!this.props.draggable || !this.drag.isActive) { return; }
 
-        this.dragging = false;
-        this.setStateAsync({ dragging: false })
-            .then(() => this.snapCurrentToPosition());
+        this.setDragInactive(ev)
+            .then(() => this.swapSlides())
+            .then(() => {
+                this.snapCurrentToPosition();
+
+                this.drag = {
+                    ...this.drag,
+                    initalMousePos: {
+                        clientX: undefined,
+                        clientY: undefined,
+                    },
+                    finalMousePos: {
+                        clientX: undefined,
+                        clientY: undefined,
+                    },
+                };
+            });
     };
 
-    handleSliderMouseLeave = () => {
-        if (this.dragging) {
-            this.dragging = false;
-            this.setStateAsync({ dragging: false })
-                .then(() => this.snapCurrentToPosition());
-        }
+    handleSliderMouseLeave = (ev) => {
+        this.handleSliderMouseUp(ev);
     };
 
     handleSlideMouseUp = (ev, slideIndex) => {
-        if (this.dragging || this.state.current === slideIndex) { return; }
+        if (this.drag.isActive || this.state.current === slideIndex) { return; }
 
         ev.stopPropagation();
         this.setCurrent(slideIndex);
@@ -547,6 +606,7 @@ Carousel.propTypes = {
     infinite: PropTypes.bool,
     keyboardControl: PropTypes.bool,
     resetCurrentOnResize: PropTypes.bool,
+    swapOnDragMoveEnd: PropTypes.bool,
 
     autoplayIntervalMs: PropTypes.number,
     autoplayDirection: PropTypes.oneOf(['ltr', 'rtl']),
@@ -585,6 +645,7 @@ Carousel.defaultProps = {
     infinite: false,
     keyboardControl: false,
     resetCurrentOnResize: true,
+    swapOnDragMoveEnd: true,
 
     autoplayIntervalMs: 0,
     autoplayDirection: 'ltr',
