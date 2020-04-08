@@ -75,6 +75,7 @@ class Carousel extends Component {
         window.addEventListener('keyup', this.handleKeyboardControlUp);
         window.addEventListener('resize', this.handleResize);
 
+        this.containerRef.current.scrollLeft = 0;
         this.containerRef.current.addEventListener('scroll', this.handleScroll);
         document.body.addEventListener('touchmove', this.handleTouchScroll, { passive: false });
 
