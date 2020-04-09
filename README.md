@@ -408,6 +408,7 @@ arrows](#custom-arrows-rendering).
     current: number,       // index of the current slide
     animating: boolean,    // boolean indicating that a transition or snap is happening
     dragging: boolean,     // boolean indicating that the carousel is being dragged by a mouse
+    slideCount: number,    // number indicating how many slides are rendered by the carousel
 }
 ```
 
