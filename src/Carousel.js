@@ -75,9 +75,9 @@ class Carousel extends Component {
         window.addEventListener('keyup', this.handleKeyboardControlUp);
         window.addEventListener('resize', this.handleResize);
 
-        this.containerRef.current.scrollLeft = 0;
         this.containerRef.current.addEventListener('scroll', this.handleScroll);
         document.body.addEventListener('touchmove', this.handleTouchScroll, { passive: false });
+        this.setCurrent(this.props.current ?? 0, { snap: true });
 
         this.setupAutoplay();
     }
@@ -92,6 +92,12 @@ class Carousel extends Component {
 
         if (count(prevProps.children) !== slideCount) {
             this.setState({ slideCount });
+        }
+
+        const { current } = this.props;
+
+        if (typeof current === 'number' && prevProps.current !== current) {
+            this.setCurrent(current);
         }
     }
 
@@ -620,6 +626,7 @@ Carousel.propTypes = {
     touchSwipeVelocityThreshold: PropTypes.number,
     touchCrossAxisScrollThreshold: PropTypes.number,
 
+    current: PropTypes.number,
     beforeChange: PropTypes.func,
     afterChange: PropTypes.func,
     renderArrows: PropTypes.func,

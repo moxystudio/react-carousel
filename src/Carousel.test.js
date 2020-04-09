@@ -100,13 +100,16 @@ describe('Carousel', () => {
             arrows: true,
             beforeChange: jest.fn(),
             afterChange: jest.fn(),
-            slideTransitionDuration: 0,
-            slideSnapDuration: 0,
+            slideTransitionDuration: 1,
+            slideSnapDuration: 1,
         };
 
-        const { container } = render(<Carousel { ...props }>{renderSlides()}</Carousel>);
+        const { getByText } = render(<Carousel { ...props }>{renderSlides()}</Carousel>);
 
-        const [prev, next] = container.querySelectorAll('button');
+        const prev = getByText('Prev');
+        const next = getByText('Next');
+
+        await wait(() => expect(next.disabled).toBe(false));
 
         fireEvent.click(next);
         await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(1, { current: 0, next: 1 }));
@@ -259,6 +262,31 @@ describe('Carousel', () => {
             expect(el.className).toContain(defaultClassname);
             expect(el.className).not.toContain('undefined');
         });
+    });
+
+    it('should be controllable', async () => {
+        const props = {
+            arrows: true,
+            beforeChange: jest.fn(),
+            afterChange: jest.fn(),
+            slideTransitionDuration: 1,
+            slideSnapDuration: 1,
+            current: 0,
+        };
+
+        const { container, rerender } = render(<Carousel { ...props }>{renderSlides()}</Carousel>);
+        const slide = (index) => container.querySelector(`.rc-slide:nth-child(${index + 1})`);
+
+        expect(slide(0).className).toContain('-current');
+
+        rerender(<Carousel current={ 2 }>{renderSlides()}</Carousel>);
+        await wait(() => expect(slide(2).className).toContain('-current'));
+
+        rerender(<Carousel current={ 1 }>{renderSlides()}</Carousel>);
+        await wait(() => expect(slide(1).className).toContain('-current'));
+
+        rerender(<Carousel current={ 8 }>{renderSlides()}</Carousel>);
+        await wait(() => expect(slide(8).className).toContain('-current'));
     });
 });
 
