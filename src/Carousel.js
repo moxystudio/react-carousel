@@ -189,6 +189,7 @@ class Carousel extends Component {
                 current,
                 animating,
                 dragging,
+                slideCount,
             });
         }
 
