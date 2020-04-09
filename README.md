@@ -166,6 +166,7 @@ Props
 | `slideTransitionDuration`       | `number`               | no           | `300`         |
 | `touchSwipeVelocityThreshold`   | `number`               | no           | `0.3`         |
 | `touchCrossAxisScrollThreshold` | `number`               | no           | `0.45`        |
+| `current`                       | `number`               | no           | `undefined`   |
 | `beforeChange`                  | `function`             | no           | `() => {}`    |
 | `afterChange`                   | `function`             | no           | `() => {}`    |
 | `renderArrows`                  | `function`             | no           | `undefined`   |
@@ -272,7 +273,7 @@ Default: `true`
 If `true`, the carousel will change the current slide, to an adjacent one,
 based on the direction of the drag movement.
 Although, if the drag is enough to change the current slide by itself, it will
-respect that behaviour. 
+respect that behaviour.
 
 *Notes: Only works if the `draggable` prop is set as `true`.*
 
@@ -367,6 +368,19 @@ Default: `0.45`
 
 The velocity in pixels per frame in the cross axis (currently just y axis)
 below where a diagonal swipe on the carousel will prevent vertical scrolling
+
+#### `current`
+
+Type: `number`
+
+Default: `undefined`
+
+If set, makes the Carousel as a [controlled
+component](https://reactjs.org/docs/forms.html#controlled-components), allowing
+you to control the current slide from outside the scope of the Carousel. This
+will not disable any internal state management, and `beforeChange` /
+`afterChange` props will still be called, so you will be responsible for
+syncing your external state with the internal one of the Carousel.
 
 #### `beforeChange`
 

@@ -36,6 +36,7 @@ const carouselProps = [
         ['slideTransitionEasing', ['linear', 'ease-in', 'ease-out', 'ease-in-out']],
         ['touchSwipeVelocityThreshold', 'number'],
         ['touchCrossAxisScrollThreshold', 'number'],
+        ['current', 'number'],
     ],
     [
         ['wrapperClassName', 'text'],
@@ -133,6 +134,7 @@ const PropSetter = ({ children }) => {
             touchSwipeVelocityThreshold: 0.3,
             touchCrossAxisScrollThreshold: 0.45,
             offset: 100,
+            current: 0,
             renderArrows: undefined,
             renderDots: undefined,
             wrapperClassName: undefined,
