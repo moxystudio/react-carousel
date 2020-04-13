@@ -204,13 +204,13 @@ class Carousel extends Component {
             <>
                 <button
                     className={ classnames('rc-arrow', '-left', arrowClassName, modifierLeftClassName) }
-                    disabled={ animating || dragging || (infinite && current === 0) }
+                    disabled={ animating || dragging || (!infinite && current === 0) }
                     onClick={ this.handlePrev }>
                     Prev
                 </button>
                 <button
                     className={ classnames('rc-arrow', '-right', arrowClassName, modifierRightClassName) }
-                    disabled={ animating || dragging || (infinite && current === slideCount - 1) }
+                    disabled={ animating || dragging || (!infinite && current === slideCount - 1) }
                     onClick={ this.handleNext }>
                     Next
                 </button>
