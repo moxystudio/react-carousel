@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/moxystudio/react-carousel/compare/v0.1.4...v0.1.5) (2020-04-13)
+
+
+### Features
+
+* add slidecount arg to renderarrows ([8575fbf](https://github.com/moxystudio/react-carousel/commit/8575fbf5fb36cafd240a36ddaf9f941795ebc78b))
+* controlled carousel ([fa2fe89](https://github.com/moxystudio/react-carousel/commit/fa2fe8947d7b3dcf8b11b983418d93c50e3a5bd1))
+
+
+### Bug Fixes
+
+* enable default arrows in infinite mode ([a143c9f](https://github.com/moxystudio/react-carousel/commit/a143c9f0e092757bb00a7a13f37be9fb81f6bdba))
+* scroll to origin on mount ([8c201d5](https://github.com/moxystudio/react-carousel/commit/8c201d50afe46442faef76e537ebd45ef25b56f6))
+
 ### [0.1.4](https://github.com/moxystudio/react-carousel/compare/v0.1.3...v0.1.4) (2020-04-03)
 
 
