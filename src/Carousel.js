@@ -619,9 +619,15 @@ Carousel.propTypes = {
     autoplayIntervalMs: PropTypes.number,
     autoplayDirection: PropTypes.oneOf(['ltr', 'rtl']),
     offset: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
-    slideSnapEasing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
+    slideSnapEasing: PropTypes.oneOfType([
+        PropTypes.func,
+        PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
+    ]),
     slideSnapDuration: PropTypes.number,
-    slideTransitionEasing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
+    slideTransitionEasing: PropTypes.oneOfType([
+        PropTypes.func,
+        PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out']),
+    ]),
     slideTransitionDuration: PropTypes.number,
     touchSwipeVelocityThreshold: PropTypes.number,
     touchCrossAxisScrollThreshold: PropTypes.number,

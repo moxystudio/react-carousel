@@ -13,8 +13,10 @@ const animateProperty = ({
     amount,
     property,
     easing,
-}) => (
-    new Promise((resolve) => {
+}) => {
+    const easingFn = typeof easing === 'function' ? easing : easings[easing || 'linear'];
+
+    return new Promise((resolve) => {
         let start = null;
         const propertyStart = element[property];
 
@@ -24,7 +26,7 @@ const animateProperty = ({
             const elapsed = timestamp - start;
             const progress = clamp(elapsed / duration, 0, 1);
 
-            element[property] = propertyStart + (amount * easings[easing || 'linear'](progress));
+            element[property] = propertyStart + (amount * easingFn(progress));
 
             if (progress < 1) {
                 window.requestAnimationFrame(step);
@@ -34,8 +36,8 @@ const animateProperty = ({
         };
 
         window.requestAnimationFrame(step);
-    })
-);
+    });
+};
 
 export default animateProperty;
 

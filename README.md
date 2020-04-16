@@ -160,9 +160,9 @@ Props
 | `autoplayIntervalMs`            | `number`               | no           | `0`           |
 | `autoplayDirection`             | `string`               | no           | `'ltr'`       |
 | `offset`                        | `number` or `function` | no           | `0`           |
-| `slideSnapEasing`               | `string`               | no           | `ease-in-out` |
+| `slideSnapEasing`               | `string` or `function` | no           | `ease-in-out` |
 | `slideSnapDuration`             | `number`               | no           | `150`         |
-| `slideTransitionEasing`         | `string`               | no           | `ease-in-out` |
+| `slideTransitionEasing`         | `string` or `function` | no           | `ease-in-out` |
 | `slideTransitionDuration`       | `number`               | no           | `300`         |
 | `touchSwipeVelocityThreshold`   | `number`               | no           | `0.3`         |
 | `touchCrossAxisScrollThreshold` | `number`               | no           | `0.45`        |
@@ -318,11 +318,15 @@ It is expected that the returned number represents a value in pixels.
 
 #### `slideSnapEasing`
 
-Type: `oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out'])`
+Type: `function` or `oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out'])`
 
 Default: `ease-in-out`
 
 Easing function applied to snapping animation.
+
+You may instead provide your own easing function if the supplied ones are not
+suitable.  `slideSnapEasing` also accepts a function, `(value: number) =>
+number`. Return value must be in the `[0.0, 1.0]` range.
 
 #### `slideSnapDuration`
 
@@ -334,11 +338,15 @@ Number of milliseconds that the snapping animation takes to complete.
 
 #### `slideTransitionEasing`
 
-Type: `oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out'])`
+Type: `function` or `oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out'])`
 
 Default: `ease-in-out`
 
 Easing function applied to transition animation.
+
+You may instead provide your own easing function if the supplied ones are not
+suitable.  `slideTransitionEasing` also accepts a function, `(value: number) =>
+number`. Return value must be in the `[0.0, 1.0]` range.
 
 #### `slideTransitionDuration`
 
