@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/moxystudio/react-carousel/compare/v0.1.5...v0.1.6) (2020-04-22)
+
+
+### Features
+
+* allow using functions or strings in easing props ([1fbee7f](https://github.com/moxystudio/react-carousel/commit/1fbee7fdadfbe0f5854dabdd9056cd03e1475639))
+
 ### [0.1.5](https://github.com/moxystudio/react-carousel/compare/v0.1.4...v0.1.5) (2020-04-13)
 
 
