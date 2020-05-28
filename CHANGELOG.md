@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.7](https://github.com/moxystudio/react-carousel/compare/v0.1.6...v0.1.7) (2020-05-28)
+
+
+### Bug Fixes
+
+* reset autoplay interval on slide click ([9935ac1](https://github.com/moxystudio/react-carousel/commit/9935ac12870d05cab45babf1d78b8a37a959b315))
+
 ### [0.1.6](https://github.com/moxystudio/react-carousel/compare/v0.1.5...v0.1.6) (2020-04-22)
 
 
