@@ -539,6 +539,8 @@ class Carousel extends Component {
         if (this.drag.isActive || this.state.current === slideIndex) { return; }
 
         ev.stopPropagation();
+
+        this.setupAutoplay();
         this.setCurrent(slideIndex);
     };
 
