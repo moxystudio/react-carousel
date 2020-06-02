@@ -97,6 +97,7 @@ class Carousel extends Component {
         const { current } = this.props;
 
         if (typeof current === 'number' && prevProps.current !== current) {
+            this.setupAutoplay();
             this.setCurrent(current);
         }
     }
@@ -150,7 +151,7 @@ class Carousel extends Component {
                             [modifierDraggableClassName]: draggable,
                             [modifierDraggingClassName]: dragging,
                         }, sliderClassName) }
-                        style={ { paddingLeft: offset, paddingRight: offset } }
+                        style={ offset > 0 ? { paddingLeft: offset, paddingRight: offset } : { } }
                         onDragStart={ this.handleSliderOnDragStart }
                         onMouseDown={ this.handleSliderMouseDown }
                         onMouseMove={ this.handleSliderMouseMove }
@@ -540,7 +541,6 @@ class Carousel extends Component {
 
         ev.stopPropagation();
 
-        this.setupAutoplay();
         this.setCurrent(slideIndex);
     };
 
@@ -601,8 +601,10 @@ class Carousel extends Component {
 
     // ------------------------------------------------------------------------ Resize events handlers
     handleResize = () => {
-        this.debouncedResize.cancel();
-        this.debouncedResize();
+        if (this.props.resetCurrentOnResize) {
+            this.debouncedResize.cancel();
+            this.debouncedResize();
+        }
     };
 }
 
