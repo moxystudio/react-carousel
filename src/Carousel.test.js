@@ -71,16 +71,16 @@ describe('Carousel', () => {
 
         // Change from first to  third slide
         fireEvent.mouseUp(slide(container, 2));
-        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(1, { current: 0, next: 2 }));
-        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(1, { previous: 0, current: 2 }));
+        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(1, { current: 0, next: 2, source: 'user' }));
+        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(1, { previous: 0, current: 2, source: 'user' }));
 
         expect(container.querySelectorAll('.rc-slide.-current')).toHaveLength(1);
         expect(slide(container, 2).className).toContain('-current');
 
         // Change from third to sixth slide
         fireEvent.mouseUp(slide(container, 5));
-        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(2, { current: 2, next: 5 }));
-        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(2, { previous: 2, current: 5 }));
+        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(2, { current: 2, next: 5, source: 'user' }));
+        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(2, { previous: 2, current: 5, source: 'user' }));
 
         expect(container.querySelectorAll('.rc-slide.-current')).toHaveLength(1);
         expect(slide(container, 5).className).toContain('-current');
@@ -112,16 +112,16 @@ describe('Carousel', () => {
         await wait(() => expect(next.disabled).toBe(false));
 
         fireEvent.click(next);
-        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(1, { current: 0, next: 1 }));
-        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(1, { previous: 0, current: 1 }));
+        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(1, { current: 0, next: 1, source: 'user' }));
+        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(1, { previous: 0, current: 1, source: 'user' }));
 
         fireEvent.click(next);
-        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(2, { current: 1, next: 2 }));
-        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(2, { previous: 1, current: 2 }));
+        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(2, { current: 1, next: 2, source: 'user' }));
+        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(2, { previous: 1, current: 2, source: 'user' }));
 
         fireEvent.click(prev);
-        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(3, { current: 2, next: 1 }));
-        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(3, { previous: 2, current: 1 }));
+        await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(3, { current: 2, next: 1, source: 'user' }));
+        await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(3, { previous: 2, current: 1, source: 'user' }));
     });
 
     it('should not navigate using keyboard if keyboardControl prop is false', async () => {
@@ -225,6 +225,23 @@ describe('Carousel', () => {
         expect(slide(0).className).toContain('-current');
         await sleep(100);
         expect(slide(0).className).toContain('-current');
+    });
+
+    it('should autoplay and return the source correctly', async () => {
+        const props = {
+            slideTransitionDuration: 1,
+            slideSnapDuration: 1,
+            autoplayIntervalMs: 1,
+            beforeChange: jest.fn(),
+            afterChange: jest.fn(),
+        };
+
+        render(<Carousel { ...props }>{renderSlides()}</Carousel>);
+
+        Array.from({ length: 9 }).forEach(async (_, i) => {
+            await wait(() => expect(props.beforeChange).toHaveBeenNthCalledWith(1, { current: i, next: i + 1, source: 'autoplay' }));
+            await wait(() => expect(props.afterChange).toHaveBeenNthCalledWith(1, { previous: i, current: i + 1, source: 'autoplay' }));
+        });
     });
 
     [

@@ -278,10 +278,10 @@ class Carousel extends Component {
 
                 switch (autoplayDirection) {
                 case 'ltr':
-                    this.handleNext();
+                    this.handleNext({ source: 'autoplay' });
                     break;
                 case 'rtl':
-                    this.handlePrev();
+                    this.handlePrev({ source: 'autoplay' });
                     break;
                 default:
                     break;
@@ -339,8 +339,8 @@ class Carousel extends Component {
         return closestChildIndex;
     };
 
-    setCurrent = (i, options = { snap: false }) => {
-        const { snap } = options;
+    setCurrent = (i, options = {}) => {
+        const { snap = false, source = 'user' } = options;
         const { current } = this.state;
         const {
             slideSnapDuration,
@@ -356,7 +356,7 @@ class Carousel extends Component {
         this.setState({ animating: true });
 
         if (!snap) {
-            this.props.beforeChange({ current, next: i });
+            this.props.beforeChange({ current, next: i, source });
         }
 
         return animateProperty({
@@ -373,7 +373,7 @@ class Carousel extends Component {
             })
             .then(() => {
                 if (!snap) {
-                    this.props.afterChange({ previous: current, current: i });
+                    this.props.afterChange({ previous: current, current: i, source });
                 }
             });
     };
@@ -385,10 +385,10 @@ class Carousel extends Component {
         const current = this.calculateCurrent();
         const shouldNotify = previous !== current;
 
-        shouldNotify && this.props.beforeChange({ current: previous, next: current });
+        shouldNotify && this.props.beforeChange({ current: previous, next: current, source: 'user' });
 
         return this.setStateAsync({ current })
-            .then(() => shouldNotify && this.props.afterChange({ previous, current }));
+            .then(() => shouldNotify && this.props.afterChange({ previous, current, source: 'user' }));
     };
 
     shouldAllowCrossAxisScrolling = (ev) => {
@@ -445,20 +445,22 @@ class Carousel extends Component {
 
     // ------------------------------------------------------------------------ Arrow events handlers
 
-    handleNext = () => {
+    handleNext = (options = {}) => {
+        const { source = 'user' } = options;
         const { current, slideCount } = this.state;
 
         if (current === slideCount - 1 && !this.props.infinite) { return; }
 
-        return this.setCurrent((this.state.current + 1) % this.state.slideCount);
+        return this.setCurrent((this.state.current + 1) % this.state.slideCount, { source });
     };
 
-    handlePrev = () => {
+    handlePrev = (options = {}) => {
+        const { source = 'user' } = options;
         const { current } = this.state;
 
         if (current === 0 && !this.props.infinite) { return; }
 
-        return this.setCurrent(this.state.current === 0 ? this.state.slideCount - 1 : this.state.current - 1);
+        return this.setCurrent(this.state.current === 0 ? this.state.slideCount - 1 : this.state.current - 1, { source });
     };
 
     // ------------------------------------------------------------------------ Keyboard events handlers
