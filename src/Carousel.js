@@ -479,9 +479,11 @@ class Carousel extends Component {
         switch (ev.keyCode) {
         case 37:
             this.handlePrev();
+            this.props.onUserInteraction('keyDown', ev);
             break;
         case 39:
             this.handleNext();
+            this.props.onUserInteraction('keyDown', ev);
             break;
         default:
             break;
@@ -494,6 +496,11 @@ class Carousel extends Component {
         if (!this.props.draggable) { return; }
 
         this.setDragActive(ev);
+        this.props.onUserInteraction('dragStart', ev);
+    };
+
+    handleSliderMouseDown = (ev) => {
+        this.props.onUserInteraction('mouseDown', ev);
     };
 
     handleSliderMouseMove = (ev) => {
@@ -508,10 +515,14 @@ class Carousel extends Component {
             this.containerRef.current.scrollLeft -= ev.movementX;
             this.swapSlides();
         }
+
+        this.props.onUserInteraction('mouseMove', ev);
     };
 
     handleSliderMouseUp = (ev) => {
         if (!this.props.draggable || !this.drag.isActive) { return; }
+
+        this.props.onUserInteraction('mouseUp', ev);
 
         this.setDragInactive(ev)
             .then(() => this.swapSlides())
@@ -534,6 +545,7 @@ class Carousel extends Component {
 
     handleSliderMouseLeave = (ev) => {
         this.handleSliderMouseUp(ev);
+        this.props.onUserInteraction('mouseLeave', ev);
     };
 
     handleSlideMouseUp = (ev, slideIndex) => {
@@ -552,12 +564,14 @@ class Carousel extends Component {
 
         this.setLastTouch(ev);
         this.touching = true;
+        this.props.onUserInteraction('touchStart', ev);
     };
 
     handleSliderTouchMove = (ev) => {
         this.setLastTouch(ev);
 
         this.touchScrolling = Math.abs(this.velocity?.x ?? 0) > TOUCH_SCROLLING_VELOCITY_THRESHOLD;
+        this.props.onUserInteraction('touchMove', ev);
     };
 
     handleSliderTouchEnd = (ev) => {
@@ -577,6 +591,8 @@ class Carousel extends Component {
         if (!this.touchScrolling && !disableNativeScroll) {
             this.snapCurrentToPosition();
         }
+
+        this.props.onUserInteraction('touchEnd', ev);
     };
 
     // ------------------------------------------------------------------------ Scroll events handlers
@@ -639,6 +655,7 @@ Carousel.propTypes = {
     current: PropTypes.number,
     beforeChange: PropTypes.func,
     afterChange: PropTypes.func,
+    onUserInteraction: PropTypes.func,
     renderArrows: PropTypes.func,
     renderDots: PropTypes.func,
 
@@ -678,6 +695,7 @@ Carousel.defaultProps = {
 
     beforeChange: noop,
     afterChange: noop,
+    onUserInteraction: noop,
 };
 
 export default Carousel;

@@ -155,6 +155,7 @@ const PropSetter = ({ children }) => {
     const callbacks = {
         beforeChange: logCallbacks ? (v) => console.log('beforeChange', v) : () => {},
         afterChange: logCallbacks ? (v) => console.log('afterChange', v) : () => {},
+        onUserInteraction: logCallbacks ? (type, ev) => console.log('onUserInteraction', type, ev) : () => {},
     };
 
     const renderProps = {

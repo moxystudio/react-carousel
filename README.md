@@ -169,6 +169,7 @@ Props
 | `current`                       | `number`               | no           | `undefined`   |
 | `beforeChange`                  | `function`             | no           | `() => {}`    |
 | `afterChange`                   | `function`             | no           | `() => {}`    |
+| `onUserInteraction`             | `function`             | no           | `() => {}`    |
 | `renderArrows`                  | `function`             | no           | `undefined`   |
 | `renderDots`                    | `function`             | no           | `undefined`   |
 | `wrapperClassName`              | `string`               | no           | `undefined`   |
@@ -410,6 +411,27 @@ Callback function that is called after a slide change happens. Function is only
 called after transitions have ended and internal state is updated.
 
 Its signature is `({ previous: number, current: number }) => void`
+
+#### `onUserInteraction`
+
+Type: `function`
+
+Default: `() => {}`
+
+Callback function that is called whenever the user interacts with the carousel,
+either from mouse, touch, or keyboard.
+
+Its signature is `({ type, event }) => void`, where type is one of:
+
+- `'dragStart'`
+- `'keyDown'`
+- `'mouseDown'`
+- `'mouseMove'`
+- `'mouseLeave'`
+- `'mouseUp'`
+- `'touchStart'`
+- `'touchMove'`
+- `'touchEnd'`
 
 #### `renderArrows`
 
