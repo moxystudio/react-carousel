@@ -398,7 +398,7 @@ Default: `() => {}`
 
 Callback function that is called before a slide change happens.
 
-Its signature is `({ current: number, next: number }) => void`
+Its signature is `({ current: number, next: number, source: 'user' | 'autoplay' }) => void`
 
 #### `afterChange`
 
@@ -409,7 +409,7 @@ Default: `() => {}`
 Callback function that is called after a slide change happens. Function is only
 called after transitions have ended and internal state is updated.
 
-Its signature is `({ previous: number, current: number }) => void`
+Its signature is `({ previous: number, current: number, source: 'user' | 'autoplay' }) => void`
 
 #### `renderArrows`
 
