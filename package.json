@@ -1,6 +1,6 @@
 {
   "name": "@moxy/react-carousel",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Fully stylable, CSS oriented carousel",
   "main": "lib/index.js",
   "module": "es/index.js",

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.com/moxystudio/react-carousel/compare/v0.1.7...v0.1.8) (2020-06-09)
+
+
+### Features
+
+* add source parameter to afterChange and beforeChange callbacks ([5346752](https://github.com/moxystudio/react-carousel/commit/53467528fedead5b5b5934be6e6f298a5be949b5))
+
+
+### Bug Fixes
+
+* reset autoplay when current changes ([53a57c2](https://github.com/moxystudio/react-carousel/commit/53a57c280b2a8eecc4733b4169cae8eeb6506030))
+
 ### [0.1.7](https://github.com/moxystudio/react-carousel/compare/v0.1.6...v0.1.7) (2020-05-28)
 
 
