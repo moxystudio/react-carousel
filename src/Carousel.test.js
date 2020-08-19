@@ -30,7 +30,7 @@ describe('Carousel', () => {
         expect(container.querySelectorAll('.rc-wrapper')).toHaveLength(1);
         expect(container.querySelectorAll('.rc-wrapper > .rc')).toHaveLength(1);
         expect(container.querySelectorAll('.rc-wrapper > .rc > .rc-slider')).toHaveLength(1);
-        expect(container.querySelectorAll('.rc-slider > .rc-slide')).toHaveLength(10);
+        expect(container.querySelectorAll('.rc-slider > .rc-slide')).toHaveLength(SLIDE_COUNT);
         expect(container.querySelectorAll('.rc-wrapper > .rc-arrow')).toHaveLength(0);
         expect(container.querySelectorAll('.rc-wrapper > .rc-dots')).toHaveLength(0);
     });
@@ -304,6 +304,13 @@ describe('Carousel', () => {
 
         rerender(<Carousel current={ 8 }>{renderSlides()}</Carousel>);
         await wait(() => expect(slide(8).className).toContain('-current'));
+    });
+
+    it('should not render falsy children', () => {
+        const slides = [false, ...renderSlides(), undefined, null];
+        const { container } = render(<Carousel>{slides}</Carousel>);
+
+        expect(container.querySelectorAll('.rc-slider > .rc-slide')).toHaveLength(SLIDE_COUNT);
     });
 });
 
