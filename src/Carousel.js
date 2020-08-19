@@ -160,7 +160,7 @@ class Carousel extends Component {
                         onTouchStart={ this.handleSliderTouchStart }
                         onTouchMove={ this.handleSliderTouchMove }
                         onTouchEnd={ this.handleSliderTouchEnd } >
-                        {React.Children.map(children, (child, i) => (
+                        { React.Children.toArray(children).map((child, i) => (
                             React.cloneElement(child, {
                                 ...child.props,
                                 key: i,
@@ -172,7 +172,7 @@ class Carousel extends Component {
                                 onDragStart: (ev) => ev.preventDefault(),
                                 onDrag: (ev) => ev.preventDefault(),
                             })
-                        ))}
+                        )) }
                     </div>
                 </div>
 
