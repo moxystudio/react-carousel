@@ -146,42 +146,42 @@ for different size slides
 Props
 ---
 
-| **Prop**                        | **Type**               | **Required** | **Default**   |
-| ---                             | ---                    | ---          | ---           |
-| `children`                      | `any`                  | **yes**      | `undefined`   |
-| `arrows`                        | `boolean`              | no           | `false`       |
-| `dots`                          | `boolean`              | no           | `false`       |
-| `disableNativeScroll`           | `boolean`              | no           | `false`       |
-| `draggable`                     | `boolean`              | no           | `false`       |
-| `infinite`                      | `boolean`              | no           | `false`       |
-| `keyboardControl`               | `boolean`              | no           | `false`       |
-| `resetCurrentOnResize`          | `boolean`              | no           | `true`        |
-| `swapOnDragMoveEnd`             | `boolean`              | no           | `true`        |
-| `autoplayIntervalMs`            | `number`               | no           | `0`           |
-| `autoplayDirection`             | `string`               | no           | `'ltr'`       |
-| `offset`                        | `number` or `function` | no           | `0`           |
-| `slideSnapEasing`               | `string` or `function` | no           | `ease-in-out` |
-| `slideSnapDuration`             | `number`               | no           | `150`         |
-| `slideTransitionEasing`         | `string` or `function` | no           | `ease-in-out` |
-| `slideTransitionDuration`       | `number`               | no           | `300`         |
-| `touchSwipeVelocityThreshold`   | `number`               | no           | `0.3`         |
-| `touchCrossAxisScrollThreshold` | `number`               | no           | `0.45`        |
-| `current`                       | `number`               | no           | `undefined`   |
-| `beforeChange`                  | `function`             | no           | `() => {}`    |
-| `afterChange`                   | `function`             | no           | `() => {}`    |
-| `renderArrows`                  | `function`             | no           | `undefined`   |
-| `renderDots`                    | `function`             | no           | `undefined`   |
-| `wrapperClassName`              | `string`               | no           | `undefined`   |
-| `carouselClassName`             | `string`               | no           | `undefined`   |
-| `sliderClassName`               | `string`               | no           | `undefined`   |
-| `arrowClassName`                | `string`               | no           | `undefined`   |
-| `dotContainerClassName`         | `string`               | no           | `undefined`   |
-| `dotClassName`                  | `string`               | no           | `undefined`   |
-| `modifierDraggableClassName`    | `string`               | no           | `undefined`   |
-| `modifierDraggingClassName`     | `string`               | no           | `undefined`   |
-| `modifierCurrentClassName`      | `string`               | no           | `undefined`   |
-| `modifierLeftClassName`         | `string`               | no           | `undefined`   |
-| `modifierRightClassName`        | `string`               | no           | `undefined`   |
+| **Prop**                                                          | **Type**               | **Required** | **Default**   |
+| ---                                                               | ---                    | ---          | ---           |
+| [`children`](#children)                                           | `any`                  | **yes**      | `undefined`   |
+| [`arrows`](#arrows)                                               | `boolean`              | no           | `false`       |
+| [`dots`](#dots)                                                   | `boolean`              | no           | `false`       |
+| [`disableNativeScroll`](#disableNativeScroll)                     | `boolean`              | no           | `false`       |
+| [`draggable`](#draggable)                                         | `boolean`              | no           | `false`       |
+| [`infinite`](#infinite)                                           | `boolean`              | no           | `false`       |
+| [`keyboardControl`](#keyboardControl)                             | `boolean`              | no           | `false`       |
+| [`resetCurrentOnResize`](#resetCurrentOnResize)                   | `boolean`              | no           | `true`        |
+| [`swapOnDragMoveEnd`](#swapOnDragMoveEnd)                         | `boolean`              | no           | `true`        |
+| [`autoplayIntervalMs`](#autoplayIntervalMs)                       | `number`               | no           | `0`           |
+| [`autoplayDirection`](#autoplayDirection)                         | `string`               | no           | `'ltr'`       |
+| [`offset`](#offset)                                               | `number` or `function` | no           | `0`           |
+| [`slideSnapEasing`](#slideSnapEasing)                             | `string` or `function` | no           | `ease-in-out` |
+| [`slideSnapDuration`](#slideSnapDuration)                         | `number`               | no           | `150`         |
+| [`slideTransitionEasing`](#slideTransitionEasing)                 | `string` or `function` | no           | `ease-in-out` |
+| [`slideTransitionDuration`](#slideTransitionDuration)             | `number`               | no           | `300`         |
+| [`touchSwipeVelocityThreshold`](#touchSwipeVelocityThreshold)     | `number`               | no           | `0.3`         |
+| [`touchCrossAxisScrollThreshold`](#touchCrossAxisScrollThreshold) | `number`               | no           | `0.45`        |
+| [`current`](#current)                                             | `number`               | no           | `undefined`   |
+| [`beforeChange`](#beforeChange)                                   | `function`             | no           | `() => {}`    |
+| [`afterChange`](#afterChange)                                     | `function`             | no           | `() => {}`    |
+| [`renderArrows`](#renderArrows)                                   | `function`             | no           | `undefined`   |
+| [`renderDots`](#renderDots)                                       | `function`             | no           | `undefined`   |
+| [`wrapperClassName`](#wrapperClassName)                           | `string`               | no           | `undefined`   |
+| [`carouselClassName`](#carouselClassName)                         | `string`               | no           | `undefined`   |
+| [`sliderClassName`](#sliderClassName)                             | `string`               | no           | `undefined`   |
+| [`arrowClassName`](#arrowClassName)                               | `string`               | no           | `undefined`   |
+| [`dotContainerClassName`](#dotContainerClassName)                 | `string`               | no           | `undefined`   |
+| [`dotClassName`](#dotClassName)                                   | `string`               | no           | `undefined`   |
+| [`modifierDraggableClassName`](#modifierDraggableClassName)       | `string`               | no           | `undefined`   |
+| [`modifierDraggingClassName`](#modifierDraggingClassName)         | `string`               | no           | `undefined`   |
+| [`modifierCurrentClassName`](#modifierCurrentClassName)           | `string`               | no           | `undefined`   |
+| [`modifierLeftClassName`](#modifierLeftClassName)                 | `string`               | no           | `undefined`   |
+| [`modifierRightClassName`](#modifierRightClassName)               | `string`               | no           | `undefined`   |
 
 API
 ---
