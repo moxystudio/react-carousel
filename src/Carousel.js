@@ -168,6 +168,7 @@ class Carousel extends Component {
                                     '-current': current === i,
                                     [modifierCurrentClassName]: current === i,
                                 }, child.props.className),
+                                onClick: (ev) => this.handleSlideClick(ev, i, child),
                                 onMouseUp: (ev) => this.handleSlideMouseUp(ev, i),
                                 onDragStart: (ev) => ev.preventDefault(),
                                 onDrag: (ev) => ev.preventDefault(),
@@ -509,6 +510,18 @@ class Carousel extends Component {
         if (this.drag.isActive) {
             this.containerRef.current.scrollLeft -= ev.movementX;
             this.swapSlides();
+        }
+    };
+
+    handleSlideClick = (ev, slideIndex, slide) => {
+        if (this.animating) {
+            ev.preventDefault();
+
+            return;
+        }
+
+        if (slide.props.onClick) {
+            slide.props.onClick(ev, slideIndex);
         }
     };
 
